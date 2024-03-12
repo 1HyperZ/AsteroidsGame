@@ -67,7 +67,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
        System.out.println("Starting Game");
-       
+
         //#region initializing obejcts
         root = new Group(); 
         scene = new Scene(root, sceneSizeX, sceneSizeY, Color.BLACK);
@@ -184,25 +184,25 @@ public class App extends Application {
         scene.setOnKeyPressed(event -> {
             KeyCode key = event.getCode();
             if(gameLoopRunning){
-                if (key == KeyCode.W) {
+                if (key == KeyCode.W|| key == KeyCode.UP) {
                     moveSound.stop();
                     moveSound.play();
                     if(spaceship.getShape().getTranslateY() > 300)
                         spaceship.moveY(-10);
                 } 
-                else if (key == KeyCode.S) {
+                else if (key == KeyCode.S || key == KeyCode.DOWN) {
                     moveSound.stop(); 
                     moveSound.play();
                     if(spaceship.getShape().getTranslateY() < 590)
                         spaceship.moveY(10);
                 }
-                else if (key == KeyCode.D) {
+                else if (key == KeyCode.D|| key == KeyCode.RIGHT) {
                     moveSound.stop(); 
                     moveSound.play();
                     if(spaceship.getShape().getTranslateX() < 580)
                         spaceship.moveX(10);
                 } 
-                else if (key == KeyCode.A) {
+                else if (key == KeyCode.A|| key == KeyCode.LEFT) {
                     moveSound.stop(); 
                     moveSound.play();
                     if(spaceship.getShape().getTranslateX() > 0)
