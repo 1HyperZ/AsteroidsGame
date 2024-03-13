@@ -7,13 +7,16 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
 
 public class SpaceshipBullet extends GameObject{
+    //#region default bullet values
     public static double DefaultBulletVel = 25;
     private static double DefaultBulletRadius = 3;
+    //#endregion
 
+    //#region props
     private double bulletVelocity;
     private double spaceShipXTranslation;
     private double spaceShipYTranslation;
-
+    //#endregion
     public SpaceshipBullet(double spaceShipX, double spaceShipY) {
         super(ColorEnum.White, new Circle(0,0, DefaultBulletRadius));
         this.shape.setTranslateX(spaceShipX);

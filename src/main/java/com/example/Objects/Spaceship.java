@@ -11,10 +11,13 @@ import javafx.scene.shape.TriangleMesh;
 
 
 public class Spaceship extends GameObject{
-
+    
+    //#region default spaceship spawn coordinates
     public static final int DefaultSpawnX = 290;
     public static final int DefaultSpawnY = 560;
-
+    //#endregion
+    
+    //#region C'tors
     public Spaceship(ColorEnum color) {
         super(color, new Rectangle(20, 10));
         this.shape.setTranslateX(DefaultSpawnX);
@@ -28,5 +31,6 @@ public class Spaceship extends GameObject{
         this.shape.setTranslateY(y);
         //TODO Auto-generated constructor stub
     }
-    
+    //#endregion
+
 }
