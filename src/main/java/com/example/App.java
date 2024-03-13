@@ -24,6 +24,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -49,14 +50,14 @@ public class App extends Application {
     List<Asteroid> asteroids;
     List<SpaceshipBullet> bullets;
 
+    Label pressEnterLabel;
     Text scoreLabel;
     Label endGameLabel;
     Label bestScoreLabel;
     MediaPlayer moveSound;
     String moveSoundPath;
     
-    
-    
+    double lastUpdateToAsteroidSpeedTimeStamp;
     double lastAsteroidSpawnTime;
     double lastAsteroidMoveTime;
     double lastBulletsMoveTime;
@@ -75,6 +76,7 @@ public class App extends Application {
 
         asteroids = new ArrayList<>();
         bullets = new ArrayList<>();
+        lastUpdateToAsteroidSpeedTimeStamp = 0;
         lastAsteroidMoveTime = 0;
         lastAsteroidSpawnTime = 0;
         lastBulletsMoveTime = 0;
@@ -86,6 +88,7 @@ public class App extends Application {
         moveSoundPath = "file:/C:/Users/omerz/Documents/VS%20Code%20Projects/Java/AsteroidsGame/src/main/resources/com/example/sounds/move_sound.wav";
         moveSound = new MediaPlayer(new Media(moveSoundPath));
         moveSound.setVolume(0.05);
+
         //#endregion
 
         //#region labels
@@ -93,20 +96,31 @@ public class App extends Application {
         scoreLabel.setFont(new Font(20));
         scoreLabel.setFill(Color.WHITE);
 
-        bestScoreLabel = new Label("Best Score: " + bestScore);
-        bestScoreLabel.setVisible(false);
-        bestScoreLabel.setTranslateX(280);
-        bestScoreLabel.setTranslateY(350);
-        bestScoreLabel.setScaleX(4);
-        bestScoreLabel.setScaleY(4);
+        pressEnterLabel = new Label("Press Enter To Play Again");
+        pressEnterLabel.setVisible(false);
+        pressEnterLabel.setTranslateX(250);
+        pressEnterLabel.setTranslateY(200);
+        pressEnterLabel.setScaleX(3);
+        pressEnterLabel.setScaleY(3);
+        pressEnterLabel.setTextFill(Color.WHITE);
 
-        endGameLabel = new Label();
-        endGameLabel.setText("Game Over");
+        endGameLabel = new Label("Game Over");
         endGameLabel.setVisible(false);
         endGameLabel.setTranslateX(280);
         endGameLabel.setTranslateY(300);
         endGameLabel.setScaleX(5);
         endGameLabel.setScaleY(5);
+        endGameLabel.setTextFill(Color.WHITE);
+
+
+        bestScoreLabel = new Label("Best Score: " + bestScore);
+        bestScoreLabel.setVisible(false);
+        bestScoreLabel.setTranslateX(280);
+        bestScoreLabel.setTranslateY(370);
+        bestScoreLabel.setScaleX(4);
+        bestScoreLabel.setScaleY(4);
+        bestScoreLabel.setTextFill(Color.WHITE);
+
         //#endregion
 
         //#region game loop
@@ -115,7 +129,7 @@ public class App extends Application {
             public void handle(long now) {
                 double timestamp = (double) now / 1000000000;
                 //#region spawinging asteroids and making them move
-                if(timestamp - lastAsteroidSpawnTime >= 2){
+                if(timestamp - lastAsteroidSpawnTime >= Asteroid.getAsteroidsSpawnTime()){
                     spawnAsteroid();
                     lastAsteroidSpawnTime = timestamp;
                     
@@ -125,6 +139,12 @@ public class App extends Application {
                     for (Asteroid asteroid : asteroids) {
                         asteroid.moveY(asteroid.getAsteriodVelocity());
                     }
+                }
+                if(timestamp - lastUpdateToAsteroidSpeedTimeStamp >= 10){
+                    Asteroid.updateAsteroidSpawnTime();
+                    Asteroid.updateAsteroidSpeed();
+                    lastUpdateToAsteroidSpeedTimeStamp = timestamp;
+                    System.out.println("Update speed and spawn time");
                 }
                 //#endregion
                 if(timestamp - lastBulletsMoveTime >= 0.1){
@@ -170,11 +190,11 @@ public class App extends Application {
                     if (event.getButton() == MouseButton.PRIMARY) {
                         // Left click detected!
                         shotSpaceshipBullet();
+                        moveSound.stop();
+                        moveSound.play();
                     }
                 }
-                else{
-                    resetGame();
-                }
+                
             }
 
         });
@@ -185,29 +205,35 @@ public class App extends Application {
             KeyCode key = event.getCode();
             if(gameLoopRunning){
                 if (key == KeyCode.W|| key == KeyCode.UP) {
-                    moveSound.stop();
-                    moveSound.play();
+                    // moveSound.stop();
+                    // moveSound.play();
                     if(spaceship.getShape().getTranslateY() > 300)
                         spaceship.moveY(-10);
                 } 
                 else if (key == KeyCode.S || key == KeyCode.DOWN) {
-                    moveSound.stop(); 
-                    moveSound.play();
+                    // moveSound.stop();
+                    // moveSound.play();
                     if(spaceship.getShape().getTranslateY() < 590)
                         spaceship.moveY(10);
                 }
                 else if (key == KeyCode.D|| key == KeyCode.RIGHT) {
-                    moveSound.stop(); 
-                    moveSound.play();
+                    // moveSound.stop();
+                    // moveSound.play();
                     if(spaceship.getShape().getTranslateX() < 580)
                         spaceship.moveX(10);
                 } 
                 else if (key == KeyCode.A|| key == KeyCode.LEFT) {
-                    moveSound.stop(); 
-                    moveSound.play();
+                    // moveSound.stop();
+                    // moveSound.play();
                     if(spaceship.getShape().getTranslateX() > 0)
                         spaceship.moveX(-10);
                 }
+            }
+            else{
+                if(key == KeyCode.ENTER){
+                    resetGame();
+                }
+
             }
         });
         //#endregion
@@ -232,6 +258,7 @@ public class App extends Application {
         spaceship.getShape().setTranslateY(Spaceship.DefaultSpawnY);
         endGameLabel.setVisible(false);
         bestScoreLabel.setVisible(false);
+        pressEnterLabel.setVisible(false);
         gameLoop.start();
         score = 0;
         scoreLabel.setText("Score: " + score);
@@ -250,7 +277,9 @@ public class App extends Application {
         bestScoreLabel.setText("Best Score: " + bestScore);
         bestScoreLabel.setVisible(true);
         bestScoreLabel.toFront();
-
+        pressEnterLabel.setVisible(true);
+        pressEnterLabel.toFront();
+        Asteroid.resetAsteroidsValuesToDefault();
     }
     //#endregion
 
@@ -261,6 +290,7 @@ public class App extends Application {
         root.getChildren().add(endGameLabel);
         root.getChildren().add(bestScoreLabel);
         root.getChildren().add(scoreLabel);
+        root.getChildren().add(pressEnterLabel);        
     }
 
     private void shotSpaceshipBullet(){

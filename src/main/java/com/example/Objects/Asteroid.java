@@ -9,14 +9,24 @@ import javafx.scene.shape.Polygon;
 
 public class Asteroid extends GameObject{
     
-    private static double DefaultAsteroidVel = 10;
+    private static double DefaultAsteroidMinVel = 7.5;
+    private static double DefaultAsteroidMaxVel = 25;   
+    private static double DefaultAsteroidsSpawnTime = 2;
+
+    private static double AsteroidMinVel = 7.5;
+    private static double AsteroidMaxVel = 25;
+    private static double AsteroidVelMultiplier = 1.25;
+
+    private static double AsteroidSpawnTimeMultiplier = 0.8;
+    private static double AsteroidsSpawnTime = 2;
 
     private double asteriodVelocity;
 
     public Asteroid() {
         super(ColorEnum.Red,  new Circle());
         setCircleProps();
-        this.asteriodVelocity = Math.random()* (25 - 7.5 + 1) + 7.5;
+        this.asteriodVelocity = Math.random()* (AsteroidMaxVel - AsteroidMinVel + 1) 
+        + AsteroidMinVel;
         //TODO Auto-generated constructor stub
     }
 
@@ -34,5 +44,31 @@ public class Asteroid extends GameObject{
         this.asteriodVelocity = asteriodVelocity;
     }
    
+    public static void updateAsteroidSpeed(){
+        AsteroidMaxVel *= AsteroidVelMultiplier;
+        AsteroidMinVel *= AsteroidVelMultiplier;
+    }
+
+
+    public static double getAsteroidsSpawnTime() {
+        return AsteroidsSpawnTime;
+    }
+
+    public static void updateAsteroidSpawnTime() {
+        AsteroidsSpawnTime *= AsteroidSpawnTimeMultiplier;
+    }
+
+    public static double getAsteroidVelMultiplier() {
+        return AsteroidVelMultiplier;
+    }
+
+    public static double getAsteroidSpawnTimeMultiplier() {
+        return AsteroidSpawnTimeMultiplier;
+    }
     
+    public static void resetAsteroidsValuesToDefault() {
+        AsteroidMaxVel = DefaultAsteroidMaxVel;
+        AsteroidMinVel = DefaultAsteroidMinVel;
+        AsteroidsSpawnTime =DefaultAsteroidsSpawnTime;
+    }
 }
