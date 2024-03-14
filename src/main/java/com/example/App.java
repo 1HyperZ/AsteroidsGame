@@ -85,7 +85,7 @@ public class App extends Application {
         //#endregion
 
         //#region sounds
-        moveSoundPath = "file:/C:/Users/omerz/Documents/VS%20Code%20Projects/Java/AsteroidsGame/src/main/resources/com/example/sounds/move_sound.wav";
+        moveSoundPath = "file:src/main/resources/com/example/sounds/move_sound.wav";
         moveSound = new MediaPlayer(new Media(moveSoundPath));
         moveSound.setVolume(0.05);
 
