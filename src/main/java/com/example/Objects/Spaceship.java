@@ -9,7 +9,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.shape.TriangleMesh;
 
-
 public class Spaceship extends GameObject{
     
     //#region default spaceship spawn coordinates
