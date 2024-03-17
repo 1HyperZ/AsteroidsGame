@@ -17,6 +17,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Box;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
@@ -50,6 +51,7 @@ public class App extends Application {
     List<Asteroid> asteroids;
     List<SpaceshipBullet> bullets;
 
+    
     Label pressEnterLabel;
     Text scoreLabel;
     Label endGameLabel;
