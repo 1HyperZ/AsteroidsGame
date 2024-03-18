@@ -1,7 +1,6 @@
 package com.example.Objects;
 
 import com.example.Utils.ColorEnum;
-import com.example.Utils.Position;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;

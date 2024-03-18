@@ -1,0 +1,13 @@
+.my-listview .list-cell {
+  -fx-text-fill: rgb(255, 255, 255);  /* Set default text color */
+}
+
+.my-listview .list-cell:odd {
+  -fx-background-color: rgb(0,0,0);  /* Set background color for even rows */
+}
+
+.my-listview .list-cell:even {
+  -fx-background-color: rgb(0,0,0);  /* Set background color for odd rows */
+}
+
+
