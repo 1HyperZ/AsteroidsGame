@@ -2,6 +2,7 @@ package com.example;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -381,7 +382,7 @@ public class App extends Application {
     private void updateTop5Leaderboard(){
         top5Leaderboard.getItems().clear();
 
-        List<LeaderboardEntry> leaderboardList = new ArrayList<>();  //temo
+        List<LeaderboardEntry> leaderboardList = new ArrayList<>();  //temp
         // List<LeaderboardEntry> leaderboardList = Database.getUserScoreList();
         leaderboardList.add(new LeaderboardEntry("bill", 5));
         leaderboardList.add(new LeaderboardEntry("gilad", 7));
@@ -397,6 +398,7 @@ public class App extends Application {
         top5Leaderboard.toFront();
         top5Text.setVisible(true);
         top5Text.toFront();
+        root.requestFocus(); // changes focus to not be on the leaderboard which leads to problems
     }
 
 
