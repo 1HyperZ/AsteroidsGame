@@ -205,6 +205,7 @@ public class App extends Application {
                             asteroids.remove(i);
                             score++;
                             scoreLabel.setText("Score: " + score);
+                            scoreLabel.toFront();
                             break;
                         }
                     }
