@@ -6,6 +6,7 @@ import com.example.Objects.SpaceshipBullet;
 import com.example.Utils.ColorEnum;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -345,7 +346,6 @@ public class App extends Application {
         addObjectsToScreen();
     }
     //#endregion
-
 
     //#region util methods
     private void addObjectsToScreen(){
