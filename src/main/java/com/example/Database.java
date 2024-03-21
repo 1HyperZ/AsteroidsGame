@@ -6,12 +6,12 @@ import java.util.List;
 
 import com.example.Utils.LeaderboardEntry;
 
-// import com.google.firebase.FirebaseApp;
-// import com.google.firebase.FirebaseOptions;
+
+import com.google.firebase.FirebaseOptions;
 
 // import java.io.FileInputStream;
 // import java.io.IOException;
-
+// import com.google.firebase.FirebaseApp;
 
 
 
@@ -21,6 +21,7 @@ import com.example.Utils.LeaderboardEntry;
 public final class Database {
 
     private Database(){
+        
     }
 
     public static int getUserBestScore(String userName) {

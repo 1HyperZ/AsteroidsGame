@@ -35,8 +35,8 @@ public final class Constants {
     public static final int Top5LeaderboardTranslationX = 0;
     public static final int Top5LeaderboardTranslationY = 25;
     public static final int Top5LeaderboardScale = 1;
-    public static final int Top5LeaderboardMaxWidth = 60;
-    public static final int Top5LeaderboardMaxHeight = 150;
+    public static final int Top5LeaderboardMaxWidth = 75;
+    public static final int Top5LeaderboardMaxHeight = 125;
 
     public static final int Top5TextTranslationX = 0;
     public static final int Top5TextTranslationY = 20;

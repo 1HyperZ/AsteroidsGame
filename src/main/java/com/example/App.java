@@ -1,5 +1,9 @@
 package com.example;
 
+import com.example.Objects.Asteroid;
+import com.example.Objects.Spaceship;
+import com.example.Objects.SpaceshipBullet;
+import com.example.Utils.ColorEnum;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -17,17 +21,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.example.Database;
+import org.example.LeaderboardEntry;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.example.Objects.Asteroid;
-import com.example.Objects.Spaceship;
-import com.example.Objects.SpaceshipBullet;
-import com.example.Utils.ColorEnum;
-import com.example.Utils.LeaderboardEntry;
-import com.example.Utils.LeaderboardEntryComparator;
 
 import static com.example.Constants.*;
 /**
@@ -53,7 +51,7 @@ public class App extends Application {
     Label bestScoreLabel;
     MediaPlayer shootSound;
     String shootSoundPath;
-    
+
     String userName;
 
     double lastUpdateToAsteroidSpeedTimeStamp;
@@ -64,13 +62,13 @@ public class App extends Application {
     int score;
     boolean gameLoopRunning;
     boolean isGameStarted;
-    
+
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage){
        System.out.println("Starting Game");
 
-        //#region initializing obejcts
-        root = new Group(); 
+        //#region initializing objects
+        root = new Group();
         scene = new Scene(root, SceneSizeX, SceneSizeY, Color.BLACK);
         spaceship = new Spaceship(ColorEnum.Blue);
 
@@ -86,7 +84,12 @@ public class App extends Application {
         //#endregion
 
         //#region sounds
-        shootSoundPath = getClass().getResource("sounds/shoot_sound.wav").toString();
+        try {
+            shootSoundPath = getClass().getResource("sounds/shoot_sound.wav").toString();
+        }catch (NullPointerException e){
+            System.out.println("Shoot Sound not found");
+        }
+
         shootSound = new MediaPlayer(new Media(shootSoundPath));
         shootSound.setVolume(ShootSoundVolume);
 
@@ -146,7 +149,7 @@ public class App extends Application {
         newBestScoreText.setFill(Color.WHITE);
 
         //#endregion
-        
+
 
         //#region username text and textbox
         enterYourNameText = new Text(EnterYourNameTextTranslationX, EnterYourNameTextTranslationY, "Enter your name:");
@@ -163,18 +166,19 @@ public class App extends Application {
         //#endregion
 
         //#endregion
-        
+
         //#region game loop
 
         gameLoop = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 double timestamp = (double) now / 1000000000;
-                //#region spawinging asteroids and making them move
+                
+                //#region spawning asteroids and making them move
                 if(timestamp - lastAsteroidSpawnTime >= Asteroid.getAsteroidsSpawnTime()){
                     spawnAsteroid();
                     lastAsteroidSpawnTime = timestamp;
-                    
+
                 }
                 if(timestamp - lastAsteroidMoveTime >= TimeBetweenAsteroidsMove){
                     lastAsteroidMoveTime = timestamp;
@@ -189,41 +193,26 @@ public class App extends Application {
                     System.out.println("Update speed and spawn time");
                 }
                 //#endregion
+               
+                //making bullets move
                 if(timestamp - lastBulletsMoveTime >= TimeBetweenBulletsMove){
                     lastBulletsMoveTime = timestamp;
                     for (SpaceshipBullet bullet : bullets) {
                         bullet.moveY(-bullet.getBulletVelocity());
                     }
                 }
-                
-                for (int i = 0 ; i < asteroids.size() ; i++) {
-                    for(SpaceshipBullet bullet : bullets){
-                        if (asteroids.get(i).getShape().getBoundsInParent().intersects(bullet.getShape().getBoundsInParent())) {
-                            root.getChildren().remove(asteroids.get(i).getShape());
-                            root.getChildren().remove(bullet.getShape());
-                            bullets.remove(bullet);
-                            asteroids.remove(i);
-                            score++;
-                            scoreLabel.setText("Score: " + score);
-                            scoreLabel.toFront();
-                            break;
-                        }
-                    }
-                }
 
-                for (Asteroid asteroid : asteroids) {
-                    if (spaceship.getShape().getBoundsInParent().intersects(asteroid.getShape().getBoundsInParent()) 
-                        || asteroid.getShape().getTranslateY() > 590) {
-                        gameOver(); // Call game over method
-                    }
-                }
+                checkForBulletAsteroidCollision();
+
+                checkForSpaceshipAsteroidCollision();
+                
             }
 
         };
         //#endregion
 
-        //#region Mouse clicks
-        scene.setOnMouseClicked(new EventHandler<MouseEvent>(){
+        //#region on Mouse click action
+        scene.setOnMouseClicked(new EventHandler<>(){
             @Override
             public void handle(MouseEvent event) {
                 // This method will be called on mouse click
@@ -235,16 +224,16 @@ public class App extends Application {
                         shootSound.play();
                     }
                 }
-                
+
             }
 
         });
         //#endregion
 
-        //#region key press
+        //#region on key press action
         scene.setOnKeyPressed(event -> {
             KeyCode key = event.getCode();
-            if(isGameStarted == false){
+            if(!isGameStarted){
                 if(key == KeyCode.ENTER)
                     startGame();
             }
@@ -255,7 +244,7 @@ public class App extends Application {
                         // shootSound.play();
                         if(spaceship.getShape().getTranslateY() > SpaceshipMaxTranslationY)
                             spaceship.moveY(-SpaceshipMovementLength);
-                    } 
+                    }
                     else if (key == KeyCode.S || key == KeyCode.DOWN) {
                         // shootSound.stop();
                         // shootSound.play();
@@ -267,7 +256,7 @@ public class App extends Application {
                         // shootSound.play();
                         if(spaceship.getShape().getTranslateX() < 580)
                             spaceship.moveX(SpaceshipMovementLength);
-                    } 
+                    }
                     else if (key == KeyCode.A|| key == KeyCode.LEFT) {
                         // shootSound.stop();
                         // shootSound.play();
@@ -292,16 +281,17 @@ public class App extends Application {
         stage.show(); // Display the game window
     }
 
-    
 
+    //#region game methods
     private void startGame() {
         userName = userNameTextField.getText();
         if(userName.length() < UsernameMinimumLength){
             System.out.println("Username is not valid! try again");
             return;
         }
-        if(Database.isNewUser(userName)){
+        if(Database.isUserRegistered(userName)){
             System.out.println("Welcome " + userName);
+
         }else{
             System.out.println("Welcome back " + userName);
         }
@@ -312,9 +302,28 @@ public class App extends Application {
         gameLoopRunning = true;
     }
 
+    private void gameOver() {
+        if(score > Database.getUserBestScore(userName)){
+            Database.setUserBestScore(userName, score);
+            newBestScoreText.setVisible(true);
+            newBestScoreText.toFront();
+            System.out.println("New Best Score! updating best score in DB");
+        }
+        bestScore = Database.getUserBestScore(userName);
+        gameLoopRunning = false;
+        System.out.println("Game Over");
+        gameLoop.stop();
+        endGameLabel.setVisible(true);
+        endGameLabel.toFront();
+        bestScoreLabel.setText("Best Score: " + bestScore);
+        bestScoreLabel.setVisible(true);
+        bestScoreLabel.toFront();
+        pressEnterLabel.setVisible(true);
+        pressEnterLabel.toFront();
+        Asteroid.resetAsteroidsValuesToDefault();
+        showTop5Leaderboard();
+    }
 
-
-    //#region game methods
     private void resetGame() {
         // TODO Auto-generated method stub
         System.out.println("Restarting Game");
@@ -335,70 +344,7 @@ public class App extends Application {
         gameLoopRunning = true;
         addObjectsToScreen();
     }
-    
-    private void gameOver() {
-        if(score > bestScore){
-            bestScore = score;
-            newBestScoreText.setVisible(true);
-            newBestScoreText.toFront();
-        }
-        gameLoopRunning = false;
-        System.out.println("Game Over");
-        gameLoop.stop();
-        endGameLabel.setVisible(true);
-        endGameLabel.toFront();
-        bestScoreLabel.setText("Best Score: " + bestScore);
-        bestScoreLabel.setVisible(true);
-        bestScoreLabel.toFront();
-        pressEnterLabel.setVisible(true);
-        pressEnterLabel.toFront();
-        Asteroid.resetAsteroidsValuesToDefault();
-        showTop5Leaderboard();
-    }
-
-    private void newGameOver() {
-        if(score > Database.getUserBestScore(userName)){
-            Database.setUserBestScore(userName, score);
-            newBestScoreText.setVisible(true);
-            newBestScoreText.toFront();
-        }
-        bestScore = Database.getUserBestScore(userName);
-        gameLoopRunning = false;
-        System.out.println("Game Over");
-        gameLoop.stop();
-        endGameLabel.setVisible(true);
-        endGameLabel.toFront();
-        bestScoreLabel.setText("Best Score: " + bestScore);
-        bestScoreLabel.setVisible(true);
-        bestScoreLabel.toFront();
-        pressEnterLabel.setVisible(true);
-        pressEnterLabel.toFront();
-        Asteroid.resetAsteroidsValuesToDefault();
-        showTop5Leaderboard();
-    }
     //#endregion
-    
-    private void updateTop5Leaderboard(){
-        top5Leaderboard.getItems().clear();
-
-        List<LeaderboardEntry> leaderboardList = new ArrayList<>();  //temo
-        // List<LeaderboardEntry> leaderboardList = Database.getUserScoreList();
-        leaderboardList.add(new LeaderboardEntry("bill", 5));
-        leaderboardList.add(new LeaderboardEntry("gilad", 7));
-        leaderboardList.sort(new LeaderboardEntryComparator());
-        for (int i = 0; i < 5 && i < leaderboardList.size(); i++) {
-            top5Leaderboard.getItems().add(leaderboardList.get(i));
-        }
-    }
-
-    private void showTop5Leaderboard() {
-        updateTop5Leaderboard();
-        top5Leaderboard.setVisible(true);
-        top5Leaderboard.toFront();
-        top5Text.setVisible(true);
-        top5Text.toFront();
-    }
-
 
 
     //#region util methods
@@ -412,23 +358,67 @@ public class App extends Application {
         root.getChildren().add(endGameLabel);
         root.getChildren().add(bestScoreLabel);
         root.getChildren().add(scoreLabel);
-        root.getChildren().add(pressEnterLabel);        
+        root.getChildren().add(pressEnterLabel);
     }
 
     private void shotSpaceshipBullet(){
-        SpaceshipBullet spaceshipBullet = new SpaceshipBullet(spaceship.getShape().getTranslateX() + 10, 
+        SpaceshipBullet spaceshipBullet = new SpaceshipBullet(spaceship.getShape().getTranslateX() + 10,
         spaceship.getShape().getTranslateY());
         root.getChildren().add(spaceshipBullet.getShape());
         bullets.add(spaceshipBullet);
-    } 
+    }
 
     private void spawnAsteroid(){
         Asteroid asteroid = new Asteroid();
         root.getChildren().add(asteroid.getShape());
         asteroids.add(asteroid);
     }
+
+    private void checkForBulletAsteroidCollision(){
+        for (int i = 0 ; i < asteroids.size() ; i++) {
+            for(SpaceshipBullet bullet : bullets){
+                if (asteroids.get(i).getShape().getBoundsInParent().intersects(bullet.getShape().getBoundsInParent())) {
+                    root.getChildren().remove(asteroids.get(i).getShape());
+                    root.getChildren().remove(bullet.getShape());
+                    bullets.remove(bullet);
+                    asteroids.remove(i);
+                    score++;
+                    scoreLabel.setText("Score: " + score);
+                    scoreLabel.toFront();
+                    break;
+                }
+            }
+        }
+    }
+
+    private void checkForSpaceshipAsteroidCollision(){
+        for (Asteroid asteroid : asteroids) {
+            if (spaceship.getShape().getBoundsInParent().intersects(asteroid.getShape().getBoundsInParent())
+                || asteroid.getShape().getTranslateY() > 590) {
+                gameOver(); // Call game over method
+            }
+        }
+    }
+
+    private void updateTop5Leaderboard(){
+        top5Leaderboard.getItems().clear();
+
+         List<LeaderboardEntry> leaderboardList = Database.getUserScoreList();
+        for (int i = 0; i < 5 && i < leaderboardList.size(); i++) {
+            top5Leaderboard.getItems().add(leaderboardList.get(i));
+        }
+    }
+
+    private void showTop5Leaderboard() {
+        updateTop5Leaderboard();
+        top5Leaderboard.setVisible(true);
+        top5Leaderboard.toFront();
+        top5Text.setVisible(true);
+        top5Text.toFront();
+        root.requestFocus(); // changes focus to not be on the leaderboard which leads to problems
+    }
     //#endregion
-    
+
     public static void main(String[] args) {
         launch(args);
     }
