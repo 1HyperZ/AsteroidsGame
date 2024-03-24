@@ -402,11 +402,7 @@ public class App extends Application {
 
     private void updateTop5Leaderboard(){
         top5Leaderboard.getItems().clear();
-
-         List<LeaderboardEntry> leaderboardList = Database.getUserScoreList();
-        for (int i = 0; i < 5 && i < leaderboardList.size(); i++) {
-            top5Leaderboard.getItems().add(leaderboardList.get(i));
-        }
+        top5Leaderboard.getItems().addAll(Database.getTop5ScoreList());
     }
 
     private void showTop5Leaderboard() {
